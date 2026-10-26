@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- index.html - a page to try the widget on: npm start, then open http://localhost:8000. It reads onsay-io.json
+     beside it, so change that file and reload to see a different widget. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Onsay IO</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #12131c; background: #fafafa; }
+    main { max-width: 640px; margin: 0 auto; padding: 48px 24px; }
+    @media (prefers-color-scheme: dark) { body { color: #edeef6; background: #0d0e15; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>A page with Onsay on it</h1>
+    <p>He sits in the corner. Click him to open the chat. What you type goes to the address in onsay-io.json, and what
+      comes back is shown. With no address, he says so.</p>
+  </main>
+  <script src="dist/onsay-io.js" data-settings="onsay-io.json"></script>
+</body>
+</html>

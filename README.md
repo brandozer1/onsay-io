@@ -1,21 +1,78 @@
 # Onsay IO
 
 Onsay as a chat widget for your website, app or kiosk. Drop it in, point it at your lingo client, and it sends what
-people type and shows the answers.
+people type and shows the answers. Open source and made to be changed: build your own support widget, help desk or
+automation panel on top of it.
 
-The code is on its way.
+## Put him on a page
 
-## What it is
+Get `onsay-io.js` and `onsay-io.json` from the [releases page](https://github.com/brandozer1/onsay-io/releases), put
+them beside your page, and add one line before `</body>`:
 
-- Onsay's face, shaped to fit wherever you put it: his colour, his surface, the panel, the words and which side he sits
-  on.
-- Open source and made to be changed. Build your own support widget, help desk or automation panel on top of it.
-- Design yours at [onsay.dev/io](https://onsay.dev/io) and keep the settings it gives you with your copy of the widget.
+```html
+<script src="onsay-io.js" data-settings="onsay-io.json"></script>
+```
 
-## Keys
+Design how he looks at [onsay.dev/io](https://onsay.dev/io) and download the settings it gives you as `onsay-io.json`.
+Or change the file by hand: every setting is below. For a page that is all chat, say which element to fill:
+`data-into="#chat"`.
 
-The widget holds no key unless you put one in. Never put a key in a widget on a public website, forum or app: anyone
-who opens the page can read it.
+## Settings
+
+`use` is what the widget is for. It sets the defaults for everything below it, and anything you write in the file wins
+over them.
+
+| Use | What it is |
+|-----|------------|
+| `support` | help on a website: a bubble in the corner, closed until clicked, the chat kept for the visit |
+| `team` | a tool a team keeps open: a drawer down the side of the page, open from the start, kept on the browser, and each person says their handle first |
+| `me` | your own page: the chat fills the page, kept on the browser |
+
+| Setting | What it is |
+|---------|------------|
+| `address` | where messages go: your lingo client's `/onsay` route, or your own service in front of it |
+| `key` | a prompt key, sent as a bearer token. Leave it out on a public page: anyone who opens the page can read it |
+| `character.color`, `face` | his colour, and the colour of his face |
+| `character.material` | his surface: `soft`, `flat`, `glossy`, `glass`, `pearl`, `chrome` or `gold` |
+| `character.mood` | what he does when nobody is talking to him: `calm`, `happy`, `alert`, `sleepy` or `still` |
+| `character.size` | his size in pixels, when he sits in the corner |
+| `panel.title`, `greeting`, `placeholder` | the panel's title, what he says first, and the hint in the message box |
+| `panel.side` | `right` or `left` |
+| `panel.theme` | `auto` (the page's `data-theme`, or what the device prefers), `light` or `dark` |
+| `panel.shape`, `open` | `bubble`, `drawer` or `page`, and whether it starts open. Set by `use`, and yours to change |
+| `session.remember` | where the chat is kept: `none`, `visit` or `browser` |
+| `session.signIn` | ask each person for their Onsay handle before they chat, sent with every message as `from` |
+
+## What it sends
+
+One POST to the address for each message, as JSON, with the prompt key as `Authorization: Bearer` when there is one:
+
+```json
+{ "message": "What you typed", "chat": "an id for this chat", "from": "handle, when signIn is on" }
+```
+
+The answer is shown as it comes back: JSON with `answer`, `text` or `value` in it, or plain text.
+
+## Layout
+
+| Folder or file | What it is |
+|----------------|------------|
+| `src/onsay-io.js` | the widget: settings, memory, sending a message, and the panel |
+| `src/character.js` | Onsay the character, the same file as on onsay.dev |
+| `onsay-io.json` | the settings the widget reads, with every default |
+| `index.html` | a page to try him on |
+| `dist/` | the built widget, one file, made by `npm run build` |
+
+## Build
+
+```
+npm install
+npm start       builds and serves index.html at http://localhost:8000, rebuilding as you edit
+npm run build   dist/onsay-io.js
+```
+
+A release is made by [`.github/workflows/release.yml`](.github/workflows/release.yml): push a tag like `v0.1.0`, or
+open Actions on GitHub, pick release and press Run workflow. The version is in `package.json`.
 
 ## License
 

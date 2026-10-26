@@ -1,0 +1,34 @@
+# release.yml - a release of Onsay IO, made on GitHub two ways: push a tag like v0.1.0, or open Actions, pick
+# "release", press "Run workflow" and type the version. The widget is built into one file and put on the release page
+# with the example settings file, which onsay.dev lists as the download.
+#   onsay-io.js      the widget, one file to put on a page
+#   onsay-io.json    the settings it reads, to change
+name: release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, like 0.1.0 (version in package.json)'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version && format('v{0}', inputs.version) || github.ref_name }}
+          files: |
+            dist/onsay-io.js
+            onsay-io.json
