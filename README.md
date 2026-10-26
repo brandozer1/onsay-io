@@ -6,20 +6,24 @@ automation panel on top of it.
 
 ## Put him on a page
 
-Get `onsay-io.js` and `onsay-io.json` from the [releases page](https://github.com/brandozer1/onsay-io/releases), put
-them beside your page, and add one line before `</body>`:
+Design him at [onsay.dev/io](https://onsay.dev/io) and copy the script tag it gives you. Paste it before `</body>` on
+your site, once, in your layout:
 
 ```html
-<script src="onsay-io.js" data-settings="onsay-io.json"></script>
+<script src="https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js"
+  data-settings='{"address": "https://laptop.yourhandle/onsay", "character": {"color": "#5865f2"}}'></script>
 ```
 
-Design how he looks at [onsay.dev/io](https://onsay.dev/io) and download the settings it gives you as `onsay-io.json`.
-Or change the file by hand: every setting is below. For a page that is all chat, say which element to fill:
-`data-into="#chat"`.
+It loads straight from this repository, so it is always the latest version. `data-settings` holds the settings
+themselves; every one is below, and any you leave out keeps its default. For a page that is all chat, say which
+element to fill: `data-into="#chat"`.
+
+Rather host the file yourself? Take `onsay-io.js` from the [releases page](https://github.com/brandozer1/onsay-io/releases),
+and point `data-settings` at a settings file instead, like `data-settings="onsay-io.json"`, read from where the page is.
 
 ## Settings
 
-`use` is what the widget is for. It sets the defaults for everything below it, and anything you write in the file wins
+`use` is what the widget is for. It sets the defaults for everything below it, and anything you write in the settings wins
 over them.
 
 | Use | What it is |
@@ -61,7 +65,7 @@ The answer is shown as it comes back: JSON with `answer`, `text` or `value` in i
 | `src/character.js` | Onsay the character, the same file as on onsay.dev |
 | `onsay-io.json` | the settings the widget reads, with every default |
 | `index.html` | a page to try him on |
-| `dist/` | the built widget, one file, made by `npm run build` |
+| `dist/` | the built widget, one file, made by `npm run build` and committed: websites load it from here through jsDelivr |
 
 ## Build
 
@@ -71,8 +75,10 @@ npm start       builds and serves index.html at http://localhost:8000, rebuildin
 npm run build   dist/onsay-io.js
 ```
 
-A release is made by [`.github/workflows/release.yml`](.github/workflows/release.yml): push a tag like `v0.1.0`, or
-open Actions on GitHub, pick release and press Run workflow. The version is in `package.json`.
+To release: run `npm run build`, commit `dist/onsay-io.js` with the change, then push a tag like `v0.1.0` (or open
+Actions on GitHub, pick release and press Run workflow). Every site using the script tag gets it within about 12 hours,
+as jsDelivr picks up the newest version tag. [`.github/workflows/release.yml`](.github/workflows/release.yml) refuses
+a release whose `dist/` isn't the build of `src/`. The version is in `package.json`.
 
 ## License
 

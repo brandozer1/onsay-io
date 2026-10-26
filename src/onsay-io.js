@@ -1,8 +1,9 @@
 // onsay-io.js - the widget: Onsay on a page, the panel he opens, and the messages between the person and a lingo
-// client. One script tag puts him there, and a settings file beside it says how he looks, what he is for, and where
-// messages go (README.md has every setting).
+// client. One script tag puts him there, its settings in the tag: how he looks, what he is for, and where messages go
+// (README.md has every setting).
 //
-//   <script src="onsay-io.js" data-settings="onsay-io.json"></script>
+//   <script src="https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js"
+//     data-settings='{"address": "https://laptop.yourhandle/onsay"}'></script>
 //
 // 1. USES                    what the widget is for, each a set of defaults: support, team or me
 // 2. settings(given)         the settings file over its use's defaults over the plain defaults
@@ -230,7 +231,7 @@ export function mount(s, into = document.body) {
     onsay.react('thinking')
     const wait = say('him', '', 'wait')
     try {
-      if (!s.address) throw new Error('This widget has no address to send messages to. Add one to its settings file.')
+      if (!s.address) throw new Error('This widget has no address to send messages to. Add one to its settings.')
       const answer = await ask(s, text, mem.chat.id, mem.chat.from)
       wait.replaceWith(say('him', answer))
       mem.chat.messages.push({ who: 'him', text: answer })
@@ -251,12 +252,15 @@ export function mount(s, into = document.body) {
 
 ////////// START //////////
 
-// The script tag says where the settings are (beside it, as onsay-io.json, when it does not) and, for a page, what
-// element to fill. A module has no currentScript, so the built file is the one a page uses.
+// The script tag carries the settings: data-settings is the settings themselves, as JSON, or the address of a settings
+// file, read from where the page is. Without it, he starts with the defaults. data-into is the element a page fills. A
+// module has no currentScript, so the built file is the one a page uses.
 const tag = document.currentScript
 if (tag) {
-  const url = new URL(tag.dataset.settings || 'onsay-io.json', tag.src || location.href)
-  fetch(url).then((r) => r.json()).then((given) => {
+  const given = (tag.dataset.settings || '').trim()
+  const read = given.startsWith('{') ? Promise.resolve().then(() => JSON.parse(given))
+    : given ? fetch(new URL(given, location.href)).then((r) => r.json()) : Promise.resolve({})
+  read.then((given) => {
     const s = settings(given)
     const into = tag.dataset.into ? document.querySelector(tag.dataset.into) : document.body
     if (!into) throw new Error(`onsay-io: nothing on the page matches ${tag.dataset.into}`)

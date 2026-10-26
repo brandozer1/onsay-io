@@ -1,8 +1,10 @@
 # release.yml - a release of Onsay IO, made on GitHub two ways: push a tag like v0.1.0, or open Actions, pick
-# "release", press "Run workflow" and type the version. The widget is built into one file and put on the release page
-# with the example settings file, which onsay.dev lists as the download.
-#   onsay-io.js      the widget, one file to put on a page
-#   onsay-io.json    the settings it reads, to change
+# "release", press "Run workflow" and type the version. Websites load the widget straight from this repository through
+# jsDelivr, https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js, which serves dist/ of the newest
+# version tag. So dist/onsay-io.js is committed, and a release is refused when it isn't the build of src/: run
+# npm run build and commit it first. The release page carries the same file, for anyone who hosts it themselves.
+#   onsay-io.js      the widget, one file
+#   onsay-io.json    every setting with its default, to start from
 name: release
 
 on:
@@ -26,6 +28,7 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run build
+      - run: git diff --quiet -- dist || { echo "dist/onsay-io.js is not the build of src/. Run npm run build, commit it, and tag again."; exit 1; }
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.version && format('v{0}', inputs.version) || github.ref_name }}
