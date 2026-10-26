@@ -1,32 +1,23 @@
 # Onsay IO
 
-The agent's face: a UI shell and customer facing widget for support and automation. It has no lingo client of its own.
-It only sends prompts to a lingo client somewhere else, at its `/onsay` route, and shows the answers. Drop it into a
-website, an app or a kiosk, point it at a lingo client, and shape it to fit.
+Onsay as a chat widget for your website, app or kiosk. Drop it in, point it at your lingo client, and it sends what
+people type and shows the answers.
 
-This repository is being scaffolded; the code lands as the work begins.
+The code is on its way.
 
 ## What it is
 
-- A thin face over a lingo client that runs elsewhere. All the thinking happens there and on Onsay's servers; IO just
-  sends prompts and renders replies.
-- Open source and made to be customized: the look, the copy, the session behaviour, and the settings are all yours to
-  change. Build your own support widget, help bot or automation panel on top of it.
+- Onsay's face, shaped to fit wherever you put it: his colour, his surface, the panel, the words and which side he sits
+  on.
+- Open source and made to be changed. Build your own support widget, help desk or automation panel on top of it.
+- Design yours at [onsay.dev/io](https://onsay.dev/io) and keep the settings it gives you with your copy of the widget.
 
-## How it reaches a lingo client
+## Keys
 
-- It is given a prompt key and an address, and sends prompts to that lingo client's `/onsay` route with the key.
-- Where it lives somewhere public, like a website, it holds no key. A key on a public page could be read, so instead it
-  talks to a server that holds the key and handles auth and anti-spam, and the page never sees the key.
-- Its settings are hard coded like a widget: signing in to Onsay, the session, and the UI options needed to fit any
-  situation.
-
-## Versions
-
-It can be written in C, but it has to run on websites and other interfaces, so there will be a few builds for
-versatility (a native build, and web and widget bundles).
+The widget holds no key unless you put one in. Never put a key in a widget on a public website, forum or app: anyone
+who opens the page can read it.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE). Part of Onsay: see the lingo client (https://github.com/brandozer1/lingo-client)
-and Onsay Desktop (https://github.com/brandozer1/onsay-desktop).
+Apache License 2.0. See [LICENSE](LICENSE). Made by Brandon Gamez and the Onsay project. See also the
+[lingo client](https://github.com/brandozer1/lingo-client).
