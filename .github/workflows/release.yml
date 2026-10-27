@@ -2,9 +2,8 @@
 # "release", press "Run workflow" and type the version. Websites load the widget straight from this repository through
 # jsDelivr, https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js, which serves dist/ of the newest
 # version tag. So dist/onsay-io.js is committed, and a release is refused when it isn't the build of src/: run
-# npm run build and commit it first. The release page carries the same file, for anyone who hosts it themselves.
-#   onsay-io.js      the widget, one file
-#   onsay-io.json    every setting with its default, to start from
+# npm run build and commit it first. The release page carries the same file, onsay-io.js, for anyone who hosts it
+# themselves.
 name: release
 
 on:
@@ -32,6 +31,4 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.version && format('v{0}', inputs.version) || github.ref_name }}
-          files: |
-            dist/onsay-io.js
-            onsay-io.json
+          files: dist/onsay-io.js

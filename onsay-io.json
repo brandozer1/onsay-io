@@ -1,7 +1,0 @@
-{
-  "use": "support",
-  "address": "",
-  "character": { "color": "#5865f2", "face": "#ffffff", "material": "soft", "mood": "calm", "size": 60 },
-  "panel": { "title": "Onsay", "greeting": "Hi. What can I help you with?", "placeholder": "Type a message", "side": "right", "theme": "auto" },
-  "session": { "remember": "visit", "signIn": false }
-}

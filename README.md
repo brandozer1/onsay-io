@@ -11,25 +11,26 @@ your site, once, in your layout:
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js"
-  data-settings='{"address": "https://laptop.yourhandle/onsay", "character": {"color": "#5865f2"}}'></script>
+  data-settings='{"address": "https://api.onsay.dev/proxy/laptop.yourhandle/onsay", "character": {"color": "#5865f2"}}'></script>
 ```
 
-It loads straight from this repository, so it is always the latest version. `data-settings` holds the settings
-themselves; every one is below, and any you leave out keeps its default. For a page that is all chat, say which
-element to fill: `data-into="#chat"`.
+It loads straight from this repository, so it is always the latest version. `data-settings` holds the settings, as
+JSON; every one is below, and any you leave out keeps its default. For a page that is all chat, say which element to
+fill: `data-into="#chat"`. Rather host the file yourself? Take `onsay-io.js` from the
+[releases page](https://github.com/brandozer1/onsay-io/releases) and point the tag's `src` at your copy.
 
-Rather host the file yourself? Take `onsay-io.js` from the [releases page](https://github.com/brandozer1/onsay-io/releases),
-and point `data-settings` at a settings file instead, like `data-settings="onsay-io.json"`, read from where the page is.
+The address is your lingo client's `/onsay` route. Through Onsay's free proxy every computer signed in to Onsay has
+one, like `https://api.onsay.dev/proxy/laptop.yourhandle/onsay`; the designer offers yours.
 
 ## Settings
 
-`use` is what the widget is for. It sets the defaults for everything below it, and anything you write in the settings wins
-over them.
+`use` is what the widget is for. It sets the defaults for the panel and the chat, and anything you write in the
+settings wins over them.
 
 | Use | What it is |
 |-----|------------|
 | `support` | help on a website: a bubble in the corner, closed until clicked, the chat kept for the visit |
-| `team` | a tool a team keeps open: a drawer down the side of the page, open from the start, kept on the browser, and each person says their handle first |
+| `team` | a tool a team keeps open: a drawer down the side of the page, open from the start, kept on the browser |
 | `me` | your own page: the chat fills the page, kept on the browser |
 
 | Setting | What it is |
@@ -37,22 +38,21 @@ over them.
 | `address` | where messages go: your lingo client's `/onsay` route, or your own service in front of it |
 | `key` | a prompt key, sent as a bearer token. Leave it out on a public page: anyone who opens the page can read it |
 | `character.color`, `face` | his colour, and the colour of his face |
-| `character.material` | his surface: `soft`, `flat`, `glossy`, `glass`, `pearl`, `chrome` or `gold` |
+| `character.material` | his surface, one of the materials `src/character.js` has: `flat`, `matte`, `soft`, `glossy`, `liquid`, `glass`, `frosted`, `pearl`, `chrome`, `gold`, `copper` or `anodised` |
 | `character.mood` | what he does when nobody is talking to him: `calm`, `happy`, `alert`, `sleepy` or `still` |
 | `character.size` | his size in pixels, when he sits in the corner |
 | `panel.title`, `greeting`, `placeholder` | the panel's title, what he says first, and the hint in the message box |
 | `panel.side` | `right` or `left` |
 | `panel.theme` | `auto` (the page's `data-theme`, or what the device prefers), `light` or `dark` |
 | `panel.shape`, `open` | `bubble`, `drawer` or `page`, and whether it starts open. Set by `use`, and yours to change |
-| `session.remember` | where the chat is kept: `none`, `visit` or `browser` |
-| `session.signIn` | ask each person for their Onsay handle before they chat, sent with every message as `from` |
+| `session.remember` | where the chat is kept: `none`, `visit` or `browser`. Set by `use`, and yours to change |
 
 ## What it sends
 
 One POST to the address for each message, as JSON, with the prompt key as `Authorization: Bearer` when there is one:
 
 ```json
-{ "message": "What you typed", "chat": "an id for this chat", "from": "handle, when signIn is on" }
+{ "message": "What you typed", "chat": "an id for this chat" }
 ```
 
 The answer is shown as it comes back: JSON with `answer`, `text` or `value` in it, or plain text.
@@ -62,9 +62,8 @@ The answer is shown as it comes back: JSON with `answer`, `text` or `value` in i
 | Folder or file | What it is |
 |----------------|------------|
 | `src/onsay-io.js` | the widget: settings, memory, sending a message, and the panel |
-| `src/character.js` | Onsay the character, the same file as on onsay.dev |
-| `onsay-io.json` | the settings the widget reads, with every default |
-| `index.html` | a page to try him on |
+| `src/character.js` | Onsay the character, a copy of the website's (`website/src/lib/character.js` in the onsay repo) |
+| `index.html` | a page to try him on, its settings in its script tag |
 | `dist/` | the built widget, one file, made by `npm run build` and committed: websites load it from here through jsDelivr |
 
 ## Build

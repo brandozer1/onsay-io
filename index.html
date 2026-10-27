@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- index.html - a page to try the widget on: npm start, then open http://localhost:8000. It reads onsay-io.json
-     beside it, so change that file and reload to see a different widget. -->
+<!-- index.html - a page to try the widget on: npm start, then open http://localhost:8000. Its settings are in the script
+     tag's data-settings, as on any site: change them and reload to see a different widget. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -15,9 +15,10 @@
 <body>
   <main>
     <h1>A page with Onsay on it</h1>
-    <p>He sits in the corner. Click him to open the chat. What you type goes to the address in onsay-io.json, and what
-      comes back is shown. With no address, he says so.</p>
+    <p>He sits in the corner. Click him to open the chat. What you type goes to the address in the script tag's
+      settings, and what comes back is shown. With no address, he says so.</p>
   </main>
-  <script src="dist/onsay-io.js" data-settings="onsay-io.json"></script>
+  <script src="dist/onsay-io.js"
+    data-settings='{"use": "support", "address": "", "character": {"color": "#5865f2", "material": "soft"}}'></script>
 </body>
 </html>

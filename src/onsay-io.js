@@ -3,13 +3,13 @@
 // (README.md has every setting).
 //
 //   <script src="https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js"
-//     data-settings='{"address": "https://laptop.yourhandle/onsay"}'></script>
+//     data-settings='{"address": "https://api.onsay.dev/proxy/laptop.yourhandle/onsay"}'></script>
 //
 // 1. USES                    what the widget is for, each a set of defaults: support, team or me
-// 2. settings(given)         the settings file over its use's defaults over the plain defaults
+// 2. settings(given)         the settings in the tag over its use's defaults over the plain ones
 // 3. memory(session)         where the chat is kept: nowhere, for the visit, or on this browser
-// 4. ask(settings, text, chat, from)   one message to the lingo client, and its answer as text
-// 5. mount(settings)         draws him and the panel, and wires it all up
+// 4. ask(settings, text, chat)   one message to the lingo client, and its answer as text
+// 5. mount(settings, into)   draws him and the panel, and wires it all up
 //
 // The lingo client's answer is read as JSON with an answer, text or value in it, or as plain text, so a route can
 // answer however is natural to it.
@@ -18,52 +18,48 @@ import { createOnsay } from './character.js'
 
 ////////// 1. USES //////////
 
-/* What the widget is for. A use is only defaults: anything the settings file says wins over it.
-   shape is how the panel sits: a bubble above him in the corner, a drawer down the side of the page, or a page that
-   fills the element the script is given with data-into (or the whole page). */
+/* What the widget is for. A use is only defaults: anything the settings say wins over it. shape is how the panel sits:
+   a bubble above him in the corner, a drawer down the side of the page, or a page that fills the element the script is
+   given with data-into (or the whole page). */
 const USES = {
   support: {
     panel: { title: 'Support', greeting: 'Hi. How can we help?', shape: 'bubble', open: false },
-    session: { remember: 'visit', signIn: false },
+    session: { remember: 'visit' },
   },
   team: {
     panel: { title: 'Onsay', greeting: 'What should I do?', shape: 'drawer', open: true },
-    session: { remember: 'browser', signIn: true },
+    session: { remember: 'browser' },
   },
   me: {
     panel: { title: 'Onsay', greeting: 'Hi. What are we doing today?', shape: 'page', open: true },
-    session: { remember: 'browser', signIn: false },
+    session: { remember: 'browser' },
   },
 }
 
+// What no use sets.
 const DEFAULTS = {
-  use: 'support',
   address: '',
   key: '',
   character: { color: '#5865f2', face: '#ffffff', material: 'soft', mood: 'calm', size: 60 },
-  panel: { title: 'Onsay', greeting: 'Hi. What can I help you with?', placeholder: 'Type a message', side: 'right', theme: 'auto', shape: 'bubble', open: false },
-  session: { remember: 'visit', signIn: false },
+  panel: { placeholder: 'Type a message', side: 'right', theme: 'auto' },
 }
 
 ////////// 2. SETTINGS //////////
 
-// 2.
-export function settings(given = {}) {
-  const use = USES[given.use] || USES[DEFAULTS.use]
-  const s = { ...DEFAULTS, ...given }
-  s.character = { ...DEFAULTS.character, ...given.character }
-  s.panel = { ...DEFAULTS.panel, ...use.panel, ...given.panel }
-  s.session = { ...DEFAULTS.session, ...use.session, ...given.session }
-  return s
+// 2. An unknown use is support.
+function settings(given = {}) {
+  const use = USES[given.use] || USES.support
+  return { ...DEFAULTS, ...given, character: { ...DEFAULTS.character, ...given.character },
+    panel: { ...DEFAULTS.panel, ...use.panel, ...given.panel }, session: { ...use.session, ...given.session } }
 }
 
 ////////// 3. MEMORY //////////
 
-// 3. The chat as { id, from, messages: [{ who, text }] }. A store that throws (private mode) is treated as none.
+// 3. The chat as { id, messages: [{ who, text }] }. A store that throws (private mode) is treated as none.
 function memory(session) {
   const store = session.remember === 'browser' ? localStorage : session.remember === 'visit' ? sessionStorage : null
   const key = 'onsay-io'
-  const fresh = () => ({ id: Math.random().toString(36).slice(2) + Date.now().toString(36), from: '', messages: [] })
+  const fresh = () => ({ id: Math.random().toString(36).slice(2) + Date.now().toString(36), messages: [] })
   let chat
   try { chat = store && JSON.parse(store.getItem(key)) } catch { chat = null }
   chat = chat?.id ? chat : fresh()
@@ -73,11 +69,11 @@ function memory(session) {
 
 ////////// 4. ASKING //////////
 
-// 4. POST { message, chat, from } to the address, the prompt key as a bearer token when there is one.
-export async function ask(s, text, chat, from) {
+// 4. POST { message, chat } to the address, the prompt key as a bearer token when there is one.
+async function ask(s, text, chat) {
   const headers = { 'content-type': 'application/json' }
   if (s.key) headers.authorization = `Bearer ${s.key}`
-  const res = await fetch(s.address, { method: 'POST', headers, body: JSON.stringify({ message: text, chat, from: from || undefined }) })
+  const res = await fetch(s.address, { method: 'POST', headers, body: JSON.stringify({ message: text, chat }) })
   const body = await res.text()
   if (!res.ok) throw new Error(body || `${res.status}`)
   try {
@@ -123,14 +119,12 @@ input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var
 input::placeholder { color: var(--ink-3); } input:focus { border-color: var(--color); }
 form button { padding: 0 14px; border-radius: 10px; background: var(--color); color: var(--face); font-weight: 600; }
 form button:disabled { opacity: .5; cursor: default; }
-.who { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--edge); }
-.who p { margin: 0; font-size: 13px; color: var(--ink-2); }
 `
 
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e }
 
 // 5.
-export function mount(s, into = document.body) {
+function mount(s, into = document.body) {
   const { panel: p, character: c } = s
   const page = p.shape === 'page'
   const root = el('div')
@@ -202,23 +196,6 @@ export function mount(s, into = document.body) {
     for (const m of mem.chat.messages) say(m.who, m.text)
   }
 
-  // A name is asked once, then kept with the chat, so a team's lingo client knows who is talking.
-  if (s.session.signIn && !mem.chat.from) {
-    const who = el('div', 'who')
-    const whoInput = el('input')
-    whoInput.placeholder = 'Your Onsay handle'
-    whoInput.setAttribute('aria-label', 'Your Onsay handle')
-    who.append(el('p', '', 'Say who you are to start chatting.'), whoInput)
-    form.replaceWith(who)
-    whoInput.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' || !whoInput.value.trim()) return
-      mem.chat.from = whoInput.value.trim().replace(/^@/, '')
-      mem.save()
-      who.replaceWith(form)
-      input.focus()
-    })
-  }
-
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     const text = input.value.trim()
@@ -232,7 +209,7 @@ export function mount(s, into = document.body) {
     const wait = say('him', '', 'wait')
     try {
       if (!s.address) throw new Error('This widget has no address to send messages to. Add one to its settings.')
-      const answer = await ask(s, text, mem.chat.id, mem.chat.from)
+      const answer = await ask(s, text, mem.chat.id)
       wait.replaceWith(say('him', answer))
       mem.chat.messages.push({ who: 'him', text: answer })
       mem.save()
@@ -252,19 +229,15 @@ export function mount(s, into = document.body) {
 
 ////////// START //////////
 
-// The script tag carries the settings: data-settings is the settings themselves, as JSON, or the address of a settings
-// file, read from where the page is. Without it, he starts with the defaults. data-into is the element a page fills. A
-// module has no currentScript, so the built file is the one a page uses.
+// The script tag carries the settings: data-settings, as JSON. Without it, he starts with the defaults. data-into is the
+// element a page fills. A module has no currentScript, so the built file is the one a page uses.
 const tag = document.currentScript
 if (tag) {
-  const given = (tag.dataset.settings || '').trim()
-  const read = given.startsWith('{') ? Promise.resolve().then(() => JSON.parse(given))
-    : given ? fetch(new URL(given, location.href)).then((r) => r.json()) : Promise.resolve({})
-  read.then((given) => {
-    const s = settings(given)
+  try {
+    const s = settings(JSON.parse(tag.dataset.settings?.trim() || '{}'))
     const into = tag.dataset.into ? document.querySelector(tag.dataset.into) : document.body
-    if (!into) throw new Error(`onsay-io: nothing on the page matches ${tag.dataset.into}`)
+    if (!into) throw new Error(`nothing on the page matches ${tag.dataset.into}`)
     const go = () => { window.onsayIO = mount(s, into) }
     document.body ? go() : addEventListener('DOMContentLoaded', go)
-  }).catch((err) => console.error('onsay-io: could not start.', err))
+  } catch (err) { console.error('onsay-io: could not start.', err) }
 }
