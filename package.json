@@ -1,6 +1,6 @@
 {
   "name": "onsay-io",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Onsay as a chat widget for your website, app or kiosk.",
   "license": "Apache-2.0",
   "private": true,

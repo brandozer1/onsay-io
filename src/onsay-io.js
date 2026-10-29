@@ -9,11 +9,12 @@
 // 2. settings(given)         the settings in the tag over its use's defaults over the plain ones
 // 3. memory(session)         where the chat is kept: nowhere, for the visit, or on this browser
 // 4. reach(address)          -> the web address messages go to: one on the web as it is, an Onsay name through Onsay
-//    ask(settings, text, chat)   one message to the lingo client, and its answer as text
+//    ask(settings, text, chat)   one message to the lingo client's /onsay, in this chat's session, and its answer as
+//                                text, or why not in words
 // 5. mount(settings, into)   draws him and the panel, and wires it all up
 //
-// The lingo client's answer is read as JSON with an answer, text or value in it, or as plain text, so a route can
-// answer however is natural to it.
+// The answer is read as /onsay gives it, JSON with its text or the questions it asks back, or as JSON with an answer or
+// value in it, or plain text, so a service in front of it can answer however is natural to it.
 
 import { createOnsay } from './character.js'
 import tlds from './tlds.txt'
@@ -93,17 +94,18 @@ function reach(address) {
   return reached.then((at) => at + rest.slice(host.length))
 }
 
-// 4. POST { message, chat } to the address, the prompt key as a bearer token when there is one.
+// 4. POST { prompt, session } to the address, the prompt key as a bearer token when there is one. A refusal says why in
+//    the answer's own words when it has some.
 async function ask(s, text, chat) {
   const headers = { 'content-type': 'application/json' }
   if (s.key) headers.authorization = `Bearer ${s.key}`
-  const res = await fetch(await reach(s.address), { method: 'POST', headers, body: JSON.stringify({ message: text, chat }) })
+  const res = await fetch(await reach(s.address), { method: 'POST', headers, body: JSON.stringify({ prompt: text, session: chat }) })
   const body = await res.text()
-  if (!res.ok) throw new Error(body || `${res.status}`)
-  try {
-    const data = JSON.parse(body)
-    return typeof data === 'string' ? data : String(data.answer ?? data.text ?? data.value ?? body)
-  } catch { return body }
+  let data = body
+  try { data = JSON.parse(body) } catch { /* plain text */ }
+  if (!res.ok) throw Object.assign(new Error(data?.error || 'That did not go through. Try again in a moment.'), { said: true })
+  if (typeof data === 'string') return data
+  return Array.isArray(data.questions) ? data.questions.map((q) => q?.question ?? q).join('\n') : String(data.text ?? data.answer ?? data.value ?? body)
 }
 
 ////////// 5. THE WIDGET //////////
@@ -239,7 +241,7 @@ function mount(s, into = document.body) {
       mem.save()
       onsay.react('answered')
     } catch (err) {
-      wait.replaceWith(say('him', s.address ? 'That did not go through. Try again in a moment.' : err.message, 'bad'))
+      wait.replaceWith(say('him', !s.address || err.said ? err.message : 'That did not go through. Try again in a moment.', 'bad'))
       onsay.react('error')
     }
     send.disabled = false

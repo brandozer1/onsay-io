@@ -62,10 +62,12 @@ gives, the rest of the address after it: today the free proxy, `https://api.onsa
 One POST to the address for each message, as JSON, with the prompt key as `Authorization: Bearer` when there is one:
 
 ```json
-{ "message": "What you typed", "chat": "an id for this chat" }
+{ "prompt": "What you typed", "session": "an id for this chat" }
 ```
 
-The answer is shown as it comes back: JSON with `answer`, `text` or `value` in it, or plain text.
+which is what a lingo client's `/onsay` takes, the session keeping the chat on that computer. The answer is shown as it
+comes back: JSON with `text`, or the `questions` Onsay asks back, a line each, or `answer` or `value` in it, or plain
+text. When the address refuses, its `error` is shown.
 
 ## Layout
 
