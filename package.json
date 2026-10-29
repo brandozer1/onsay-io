@@ -1,13 +1,13 @@
 {
   "name": "onsay-io",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Onsay as a chat widget for your website, app or kiosk.",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild src/onsay-io.js --bundle --minify --format=iife --outfile=dist/onsay-io.js",
-    "start": "esbuild src/onsay-io.js --bundle --format=iife --outfile=dist/onsay-io.js --servedir=. --watch"
+    "build": "esbuild src/onsay-io.js --bundle --minify --format=iife --loader:.txt=text --outfile=dist/onsay-io.js",
+    "start": "esbuild src/onsay-io.js --bundle --format=iife --loader:.txt=text --outfile=dist/onsay-io.js --servedir=. --watch"
   },
   "devDependencies": {
     "esbuild": "0.24.2"

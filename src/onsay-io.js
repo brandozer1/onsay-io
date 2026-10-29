@@ -3,18 +3,20 @@
 // (README.md has every setting).
 //
 //   <script src="https://cdn.jsdelivr.net/gh/brandozer1/onsay-io@latest/dist/onsay-io.js"
-//     data-settings='{"address": "https://api.onsay.dev/proxy/laptop.yourhandle/onsay"}'></script>
+//     data-settings='{"address": "laptop.yourhandle/onsay"}'></script>
 //
 // 1. USES                    what the widget is for, each a set of defaults: support, team or me
 // 2. settings(given)         the settings in the tag over its use's defaults over the plain ones
 // 3. memory(session)         where the chat is kept: nowhere, for the visit, or on this browser
-// 4. ask(settings, text, chat)   one message to the lingo client, and its answer as text
+// 4. reach(address)          -> the web address messages go to: one on the web as it is, an Onsay name through Onsay
+//    ask(settings, text, chat)   one message to the lingo client, and its answer as text
 // 5. mount(settings, into)   draws him and the panel, and wires it all up
 //
 // The lingo client's answer is read as JSON with an answer, text or value in it, or as plain text, so a route can
 // answer however is natural to it.
 
 import { createOnsay } from './character.js'
+import tlds from './tlds.txt'
 
 ////////// 1. USES //////////
 
@@ -69,11 +71,33 @@ function memory(session) {
 
 ////////// 4. ASKING //////////
 
+// Where Onsay says where an Onsay name goes, the one address the widget asks about names, and the web's top level
+// domains, the same list Onsay keeps.
+const RESOLVE = 'https://api.onsay.dev/resolve/'
+const TLDS = new Set(tlds.toLowerCase().split(/\r?\n/).filter((t) => t && !t.startsWith('#')))
+let reached = null   // the address an Onsay name resolved to, asked once a page
+
+/* 4. By the one rule every Onsay repo keeps: a host is on the web when it is an IP, localhost, or a name with a dot
+      ending in one of the web's top level domains, like example.com, http:// or https:// left off when it likes. Any
+      other, like laptop.brandon, is an Onsay name: Onsay gives its web address, and what followed the name goes on
+      after it. */
+function reach(address) {
+  const t = address.trim(), rest = t.replace(/^https?:\/\//i, ''), host = rest.split(/[/?#]/)[0].toLowerCase(), bare = host.replace(/:\d+$/, '')
+  const ip = /^(\d{1,3}(\.\d{1,3}){3}|\[[0-9a-f:]+\]|localhost)$/.test(bare)
+  if (ip || (bare.includes('.') && TLDS.has(bare.slice(bare.lastIndexOf('.') + 1)))) return Promise.resolve(rest === t ? `${ip ? 'http' : 'https'}://${t}` : t)
+  reached ??= fetch(RESOLVE + encodeURIComponent(host)).then(async (r) => {
+    const d = await r.json()
+    if (!d.address) throw new Error(d.error || `${host} has nowhere to send messages yet`)
+    return d.address
+  }).catch((err) => { reached = null; throw err })
+  return reached.then((at) => at + rest.slice(host.length))
+}
+
 // 4. POST { message, chat } to the address, the prompt key as a bearer token when there is one.
 async function ask(s, text, chat) {
   const headers = { 'content-type': 'application/json' }
   if (s.key) headers.authorization = `Bearer ${s.key}`
-  const res = await fetch(s.address, { method: 'POST', headers, body: JSON.stringify({ message: text, chat }) })
+  const res = await fetch(await reach(s.address), { method: 'POST', headers, body: JSON.stringify({ message: text, chat }) })
   const body = await res.text()
   if (!res.ok) throw new Error(body || `${res.status}`)
   try {
