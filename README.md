@@ -1,7 +1,7 @@
 # Onsay IO
 
 Onsay as a chat widget for your website, app or kiosk. Drop it in, point it at your lingo client, and it sends what
-people type and shows the answers. Open source and made to be changed: build your own support widget, help desk or
+people type and shows the answers. Made to be changed: build your own support widget, help desk or
 automation panel on top of it.
 
 ## Put him on a page
